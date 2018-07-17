@@ -1,5 +1,6 @@
-鲜血盟约导演器
-用于随机身份
+## 鲜血盟约导演器
+用于导演随机身份
+
 [规则链接](https://www.mistytown.cn/forum.php?mod=viewthread&tid=5859)
 
 使用方法：
@@ -8,16 +9,18 @@
 
 by ITX351
 
-## Setup
+## React 配置
+
+**Setup**
 
 Make sure you have Node.js > 6.5.0 installed.
 
 Run `npm install` to install all the dependencies.
 
-## Running
+**Running**
 
 Run `npm start` and visit `localhost:3000` to debug.
 
-## Release
+**Release**
 
 Run `npm run build` to make a minimized production build.
