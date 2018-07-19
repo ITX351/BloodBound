@@ -100,20 +100,50 @@ class App extends Component {
             <a href="/forum.php?mod=viewthread&tid=5859">规则链接</a>
           </h5>
         </header>
-        <div>
-          <div>
-            演员列表：
-            <textarea value={playerNames} onChange={event => this.setState({playerNames: event.target.value})} />
-            <input type="checkbox"
-                   checked={shufflePlayerList}
-                   onChange={value => this.setState({shufflePlayerList: value.currentTarget.checked})}
-            />位置洗牌
-            <button type="button" onClick={this.handleSubmit}>
-              生成
-            </button>
-          </div>
-          <div>
-            <textarea value={result}/>
+        <div className="container-fluid index-area">
+          <div className="row">
+            <div className="col-4">
+              <div className="text-left">
+                演员列表
+              </div>
+              <div className="text-left">
+                <textarea
+                  value={playerNames}
+                  rows="10"
+                  cols="15"
+                  style={{resize : "none"}}
+                  onChange={event => this.setState({playerNames: event.target.value})}
+                />
+              </div>
+              <div className="text-left">
+                <input
+                  type="checkbox"
+                  checked={shufflePlayerList}
+                  onChange={value => this.setState({shufflePlayerList: value.currentTarget.checked})}
+                />位置洗牌
+              </div>
+              <div className="text-right">
+                <button
+                  type="button"
+                  className="btn btn-outline-success spacing-20"
+                  onClick={this.handleSubmit}>
+                  生成
+                </button>
+              </div>
+            </div>
+            <div className="col-8">
+              <div className="text-left">
+                生成结果
+              </div>
+              <div className="text-left">
+                <textarea
+                  value={result}
+                  rows="10"
+                  cols="28"
+                  style={{resize : "none"}}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

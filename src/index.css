@@ -3,3 +3,10 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+.index-area {
+  min-width: 400px;
+  max-width: 500px;
+  white-space: pre-line;
+  padding-bottom: 200px;
+}
