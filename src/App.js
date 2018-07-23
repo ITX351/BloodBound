@@ -67,7 +67,7 @@ class App extends Component {
       let thisStr = finalList[i];
       let identityName = "";
       if (thisStr !== "审判者") {
-        identityName = identityNameList[parseInt(thisStr.slice(1, 2))] + " ";
+        identityName = identityNameList[parseInt(thisStr.slice(1, 2), 10)] + " ";
       }
 
       let nextStr = finalList[(i + 1) % finalList.length];
@@ -95,18 +95,14 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <h1 className="App-title">鲜血盟约导演器</h1>
-          <h5>
-            <a href="/forum.php?mod=viewthread&tid=5859">规则链接</a>
-          </h5>
+          <h1 className="App-title space-20">鲜血盟约导演器</h1>
+          <h5 className="space-20"><a href="/forum.php?mod=viewthread&tid=5859">规则链接</a></h5>
         </header>
         <div className="container-fluid index-area">
-          <div className="row">
-            <div className="col-4">
-              <div className="text-left">
-                演员列表
-              </div>
-              <div className="text-left">
+          <div className="row space-10 no-gutters">
+            <div className="col-4 text-center">
+              <h6 className="space-10">演员列表</h6>
+              <div>
                 <textarea
                   value={playerNames}
                   rows="10"
@@ -115,34 +111,38 @@ class App extends Component {
                   onChange={event => this.setState({playerNames: event.target.value})}
                 />
               </div>
-              <div className="text-left">
-                <input
-                  type="checkbox"
-                  checked={shufflePlayerList}
-                  onChange={value => this.setState({shufflePlayerList: value.currentTarget.checked})}
-                />位置洗牌
-              </div>
-              <div className="text-right">
-                <button
-                  type="button"
-                  className="btn btn-outline-success spacing-20"
-                  onClick={this.handleSubmit}>
-                  生成
-                </button>
-              </div>
             </div>
-            <div className="col-8">
-              <div className="text-left">
-                生成结果
-              </div>
-              <div className="text-left">
+            <div className="col-8 text-center">
+              <h6 className="space-10">生成结果</h6>
+              <div>
                 <textarea
                   value={result}
                   rows="10"
-                  cols="28"
+                  cols="32"
                   style={{resize : "none"}}
                 />
               </div>
+            </div>
+          </div>
+          <div className="row space-10">
+            <div className="col text-center">
+              <input
+                type="checkbox"
+                className="inline-space-5"
+                checked={shufflePlayerList}
+                onChange={value => this.setState({shufflePlayerList: value.currentTarget.checked})}
+              />
+              坐次位置洗牌
+            </div>
+          </div>
+          <div className="row space-10">
+            <div className="col text-center">
+              <button
+                type="button"
+                className="btn btn-outline-primary"
+                onClick={this.handleSubmit}>
+                生成
+              </button>
             </div>
           </div>
         </div>
