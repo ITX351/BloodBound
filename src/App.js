@@ -96,7 +96,6 @@ class App extends Component {
         newPlayerNames += (i + 1).toString() + playerNameList[i] + "\n";
         secrets += (i + 1).toString() + playerNameList[i] + " " + finalList[i] + identityName + "下家" + nextColor + "\n";
       }
-
       newPlayerNames += "随机" + App.randInt(playerNameList.length).toString() + "提刀";
     } else {
       let identityNum = playerNameList.length + 3;
@@ -110,7 +109,12 @@ class App extends Component {
         }
         secrets += (i + 1).toString() + oneNightIdentities[i] + "\n";
       }
-      newPlayerNames += "随机" + App.randInt(playerNameList.length).toString() + "发言";
+      newPlayerNames += "随机" + App.randInt(playerNameList.length).toString() + "发言\n";
+
+      newPlayerNames += playerNameList.length.toString() + "人配置：";
+      for (let i = 0; i < identityNum; i++) {
+        newPlayerNames += oneNightIdentityNameList[i] + " ";
+      }
     }
     this.setState({playerNames: newPlayerNames, result: secrets});
   }
