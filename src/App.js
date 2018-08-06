@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import './App.css';
 
+const BLOODBOUND = "BloodBound";
+const ONENIGHT = "OneNight";
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -8,7 +11,8 @@ class App extends Component {
     this.state = {
       playerNames: "",
       shufflePlayerList: false,
-      result: ""
+      result: "",
+      gameType: BLOODBOUND // "BloodBound" or "OneNight"
     };
   }
 
@@ -21,15 +25,19 @@ class App extends Component {
     }
   }
 
+  static randInt(upperBound) {
+    return Math.ceil(Math.random() * upperBound);
+  }
+
   handleSubmit(e) {
     e.preventDefault();
 
-    const {playerNames, shufflePlayerList} = this.state;
+    const {playerNames, shufflePlayerList, gameType} = this.state;
 
-    let identityNameList = ["", "长老", "刺客", "小丑", "炼金术师", "感应者", "守护者", "狂战士", "法师", "交际花"];
+    let bloodBoundIdentityNameList = ["", "长老", "刺客", "小丑", "炼金术师", "感应者", "守护者", "狂战士", "法师", "交际花"];
+    let oneNightIdentityNameList = ["狼人", "狼人", "占卜", "捣蛋", "酒鬼", "怪盗", "村民", "失眠",
+                                    "幽灵", "皮匠", "猎人", "爪牙"];
 
-    let red = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    let blue = red.slice();
     let playerNameList = playerNames.trim().split("\n");
 
     for (let i = 0; i < playerNameList.length; i++) {
@@ -46,51 +54,69 @@ class App extends Component {
     if (shufflePlayerList) {
       App.shuffleArray(playerNameList);
     }
-    App.shuffleArray(red);
-    App.shuffleArray(blue);
 
-    let aver = Math.floor(playerNameList.length / 2);
-    let finalList = [];
-
-    for (let i = 0; i < aver; i++) {
-      finalList.push("红" + red[i].toString());
-      finalList.push("蓝" + blue[i].toString());
-    }
-    if (playerNameList.length % 2 === 1) {
-      finalList.push("审判者");
-    }
-
-    App.shuffleArray(finalList);
     let newPlayerNames = "";
     let secrets = "";
-    for (let i = 0; i < finalList.length; i++) {
-      let thisStr = finalList[i];
-      let identityName = "";
-      if (thisStr !== "审判者") {
-        identityName = identityNameList[parseInt(thisStr.slice(1, 2), 10)] + " ";
+    if (gameType === BLOODBOUND) {
+      let red = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+      let blue = red.slice();
+      App.shuffleArray(red);
+      App.shuffleArray(blue);
+
+      let aver = Math.floor(playerNameList.length / 2);
+      let finalList = [];
+
+      for (let i = 0; i < aver; i++) {
+        finalList.push("红" + red[i].toString());
+        finalList.push("蓝" + blue[i].toString());
+      }
+      if (playerNameList.length % 2 === 1) {
+        finalList.push("审判者");
       }
 
-      let nextStr = finalList[(i + 1) % finalList.length];
-      let nextColor = nextStr.slice(0, 1);
-      if (nextStr === "红3") {
-        nextColor = "蓝";
-      } else if (nextStr === "蓝3") {
-        nextColor = "红";
-      } else if (nextStr === "审判者") {
-        nextColor = Math.random() > 0.5 ? "红" : "蓝";
+      App.shuffleArray(finalList);
+
+      for (let i = 0; i < finalList.length; i++) {
+        let thisStr = finalList[i];
+        let identityName = "";
+        if (thisStr !== "审判者") {
+          identityName = bloodBoundIdentityNameList[parseInt(thisStr.slice(1, 2), 10)] + " ";
+        }
+
+        let nextStr = finalList[(i + 1) % finalList.length];
+        let nextColor = nextStr.slice(0, 1);
+        if (nextStr === "红3") {
+          nextColor = "蓝";
+        } else if (nextStr === "蓝3") {
+          nextColor = "红";
+        } else if (nextStr === "审判者") {
+          nextColor = Math.random() > 0.5 ? "红" : "蓝";
+        }
+
+        newPlayerNames += (i + 1).toString() + playerNameList[i] + "\n";
+        secrets += (i + 1).toString() + playerNameList[i] + " " + finalList[i] + identityName + "下家" + nextColor + "\n";
       }
 
-      newPlayerNames += (i + 1).toString() + playerNameList[i] + "\n";
-      secrets += (i + 1).toString() + playerNameList[i] + " " + finalList[i] + identityName + "下家" + nextColor + "\n";
+      newPlayerNames += "随机" + App.randInt(playerNameList.length).toString() + "提刀";
+    } else {
+      let identityNum = playerNameList.length + 3;
+      let oneNightIdentities = oneNightIdentityNameList.slice(0, identityNum);
+      App.shuffleArray(oneNightIdentities);
+
+      for (let i = 0; i < identityNum; i++) {
+        if (i < playerNameList.length) {
+          newPlayerNames += (i + 1).toString() + playerNameList[i] + "\n";
+          secrets += playerNameList[i] + " ";
+        }
+        secrets += (i + 1).toString() + oneNightIdentities[i] + "\n";
+      }
+      newPlayerNames += "随机" + App.randInt(playerNameList.length).toString() + "发言";
     }
-
-    let originKnifeNumber = Math.ceil(Math.random() * playerNameList.length);
-    newPlayerNames += "随机" + originKnifeNumber.toString() + "提刀";
     this.setState({playerNames: newPlayerNames, result: secrets});
   }
 
   render() {
-    const {playerNames, shufflePlayerList, result} = this.state;
+    const {playerNames, shufflePlayerList, result, gameType} = this.state;
 
     return (
       <div className="App">
@@ -133,6 +159,28 @@ class App extends Component {
                 onChange={value => this.setState({shufflePlayerList: value.currentTarget.checked})}
               />
               坐次位置洗牌
+            </div>
+          </div>
+          <div className="row space-10">
+            <div className="col-6 text-center">
+              <input type="radio"
+                     className="spacing-inline-5"
+                     value={BLOODBOUND}
+                     name="game_type_radio"
+                     checked={gameType === BLOODBOUND}
+                     onChange={value => this.setState({gameType: value.currentTarget.value})}
+              />
+              鲜血盟约
+            </div>
+            <div className="col-6 text-center">
+              <input type="radio"
+                     className="spacing-inline-5"
+                     value={ONENIGHT}
+                     name="game_type_radio"
+                     checked={gameType === ONENIGHT}
+                     onChange={value => this.setState({gameType: value.currentTarget.value})}
+              />
+              一夜狼人
             </div>
           </div>
           <div className="row space-10">
