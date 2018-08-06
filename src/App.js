@@ -135,7 +135,7 @@ class App extends Component {
               <div>
                 <textarea
                   value={playerNames}
-                  rows="10"
+                  rows="12"
                   cols="15"
                   style={{resize : "none"}}
                   onChange={event => this.setState({playerNames: event.target.value})}
@@ -147,7 +147,7 @@ class App extends Component {
               <div>
                 <textarea
                   value={result}
-                  rows="10"
+                  rows="12"
                   cols="32"
                   style={{resize : "none"}}
                 />
