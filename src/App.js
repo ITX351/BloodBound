@@ -42,12 +42,14 @@ class App extends Component {
 
     for (let i = 0; i < playerNameList.length; i++) {
       let playerName = playerNameList[i];
-      while (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].indexOf(playerName.slice(0, 1)) !== -1) {
+      while (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", " "].indexOf(playerName.slice(0, 1)) !== -1) {
         playerName = playerName.slice(1, playerName.length);
       }
       playerNameList[i] = playerName;
     }
-    if (playerNameList[playerNameList.length - 1].startsWith("随机")) {
+    while (playerNameList[playerNameList.length - 1].startsWith("随机") ||
+      playerNameList[playerNameList.length - 1].startsWith("人配置")
+      ) {
       playerNameList = playerNameList.slice(0, playerNameList.length - 1);
     }
 
