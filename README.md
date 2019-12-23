@@ -1,7 +1,7 @@
-## 随机身份分发器（鲜血盟约 / 一夜狼人 / 扇子狼人）
+## 随机身份分发器
 用于导演随机身份
 
-### 规则链接
+### 支持的规则
 [鲜血盟约(砍树)](https://www.mistytown.cn:83/forum.php?mod=viewthread&tid=5859)
 [一夜狼人](http://www.mistytown.cn:83/forum.php?mod=viewthread&tid=6614)
 [一日扇子狼人](http://www.mistytown.cn:83/forum.php?mod=viewthread&tid=7830)
