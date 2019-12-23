@@ -163,10 +163,10 @@ class App extends Component {
           <h1 className="App-title space-20">随机身份分发器</h1>
           <h6 className="space-20">
             支持规则：
-            <a href="/forum.php?mod=viewthread&tid=5859">鲜血盟约(砍树)</a>&nbsp;
+            <a href="/forum.php?mod=viewthread&tid=5859">鲜血盟约</a>&nbsp;
             <a href="/forum.php?mod=viewthread&tid=6614">一夜狼人</a>&nbsp;
             <a href="/forum.php?mod=viewthread&tid=7830">扇子狼人</a>
-            &nbsp;源代码：
+            <br/>项目源代码：
             <a href="https://github.com/ITX351/BloodBound">GitHub</a>
           </h6>
         </header>
@@ -181,8 +181,7 @@ class App extends Component {
                 <textarea
                   value={playerNames}
                   rows="12"
-                  cols="15"
-                  style={{resize : "none"}}
+                  style={{width : "85%"}}
                   onChange={event => this.setState({playerNames: event.target.value})}
                 />
               </div>
@@ -222,7 +221,7 @@ class App extends Component {
                      checked={gameType === BLOODBOUND}
                      onChange={value => this.setState({gameType: value.currentTarget.value})}
               />
-              鲜血盟约
+              鲜血盟约(砍树)
             </div>
             <div className="col-4 text-center">
               <input type="radio"
