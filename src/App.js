@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
+import Clipboard from "react-clipboard.js";
 import './App.css';
 
 const BLOODBOUND = "BloodBound";
 const ONENIGHT = "OneNight";
+const ONEDAYFAN = "OneDayFan";
 
 class App extends Component {
   constructor(props) {
@@ -11,8 +13,8 @@ class App extends Component {
     this.state = {
       playerNames: "",
       shufflePlayerList: false,
-      result: "",
-      gameType: BLOODBOUND // "BloodBound" or "OneNight"
+      results: [],
+      gameType: BLOODBOUND // "BloodBound" or "OneNight" or "OneDayFan"
     };
   }
 
@@ -37,6 +39,8 @@ class App extends Component {
     let bloodBoundIdentityNameList = ["", "长老", "刺客", "小丑", "炼金术师", "感应者", "守护者", "狂战士", "法师", "交际花"];
     let oneNightIdentityNameList = ["狼人", "狼人", "占卜", "捣蛋", "酒鬼", "怪盗", "村民", "失眠",
                                     "幽灵", "皮匠", "猎人", "爪牙"];
+    let oneDayFanIdentityNameList = ["狼人", "狼人", "狼人", "狼王", "村民", "村民", "村民", "警长",
+                                     "预言家", "女巫", "猎人", "白痴"];
 
     let playerNameList = playerNames.trim().split("\n");
 
@@ -58,7 +62,7 @@ class App extends Component {
     }
 
     let newPlayerNames = "";
-    let secrets = "";
+    let secrets = [];
     if (gameType === BLOODBOUND) {
       let red = [1, 2, 3, 4, 5, 6, 7, 8, 9];
       let blue = red.slice();
@@ -96,20 +100,29 @@ class App extends Component {
         }
 
         newPlayerNames += (i + 1).toString() + playerNameList[i] + "\n";
-        secrets += (i + 1).toString() + playerNameList[i] + " " + finalList[i] + identityName + "下家" + nextColor + "\n";
+        let secretText = (i + 1).toString() + playerNameList[i] + " " + finalList[i] + identityName + "下家" + nextColor;
+        secrets.push({
+          text: secretText,
+          copyText: secretText
+        });
       }
       newPlayerNames += "随机" + App.randInt(playerNameList.length).toString() + "提刀";
-    } else {
+    } else if (gameType === ONENIGHT) {
       let identityNum = playerNameList.length + 3;
       let oneNightIdentities = oneNightIdentityNameList.slice(0, identityNum);
       App.shuffleArray(oneNightIdentities);
 
       for (let i = 0; i < identityNum; i++) {
+        let secretText = "";
         if (i < playerNameList.length) {
           newPlayerNames += (i + 1).toString() + playerNameList[i] + "\n";
-          secrets += playerNameList[i] + " ";
+          secretText += playerNameList[i] + " ";
         }
-        secrets += (i + 1).toString() + oneNightIdentities[i] + "\n";
+        secretText += (i + 1).toString() + oneNightIdentities[i];
+        secrets.push({
+          text: secretText,
+          copyText: i < playerNameList.length ? secretText : null
+        });
       }
       newPlayerNames += "随机" + App.randInt(playerNameList.length).toString() + "发言\n";
 
@@ -117,23 +130,51 @@ class App extends Component {
       for (let i = 0; i < identityNum; i++) {
         newPlayerNames += oneNightIdentityNameList[i] + " ";
       }
+    } else if (gameType === ONEDAYFAN) {
+      let oneDayFanIdentities = oneDayFanIdentityNameList.slice();
+      App.shuffleArray(oneDayFanIdentities);
+      oneDayFanIdentities = oneDayFanIdentities.slice(0, playerNameList.length);
+
+      for (let i = 0; i < playerNameList.length; i++) {
+        newPlayerNames += (i + 1).toString() + playerNameList[i] + "\n";
+        let sendText = "";
+        for (let j = 0; j < playerNameList.length; j++) {
+          if (i !== j) {
+            sendText += (j + 1).toString() + playerNameList[j] + oneDayFanIdentities[j] + "\n";
+          }
+        }
+        secrets.push({
+          text: playerNameList[i] + " " + (i + 1).toString() + oneDayFanIdentities[i],
+          copyText: sendText
+        })
+      }
+      newPlayerNames += "随机" + App.randInt(playerNameList.length).toString() + "发言\n";
     }
-    this.setState({playerNames: newPlayerNames, result: secrets});
+    this.setState({playerNames: newPlayerNames, results: secrets});
   }
 
   render() {
-    const {playerNames, shufflePlayerList, result, gameType} = this.state;
+    const {playerNames, shufflePlayerList, results, gameType} = this.state;
+    console.log(results);
 
     return (
       <div className="App">
         <header className="App-header">
-          <h1 className="App-title space-20">鲜血盟约导演器</h1>
-          <h5 className="space-20"><a href="/forum.php?mod=viewthread&tid=5859">规则链接</a></h5>
+          <h1 className="App-title space-20">随机身份分发器</h1>
+          <h6 className="space-20">
+            规则链接：&nbsp;
+            <a href="/forum.php?mod=viewthread&tid=5859">鲜血盟约(砍树)</a>&nbsp;
+            <a href="/forum.php?mod=viewthread&tid=6614">一夜狼人</a>&nbsp;
+            <a href="/forum.php?mod=viewthread&tid=7830">一日扇子狼人</a>
+          </h6>
         </header>
         <div className="container-fluid index-area">
           <div className="row space-10 no-gutters">
             <div className="col-4 text-center">
-              <h6 className="space-10">演员列表</h6>
+              <h6 className="space-10">
+                演员列表
+                <Clipboard component="a" button-href="#" data-clipboard-text={playerNames}>[复制]</Clipboard>
+              </h6>
               <div>
                 <textarea
                   value={playerNames}
@@ -145,14 +186,17 @@ class App extends Component {
               </div>
             </div>
             <div className="col-8 text-center">
-              <h6 className="space-10">生成结果</h6>
-              <div>
-                <textarea
-                  value={result}
-                  rows="12"
-                  cols="32"
-                  style={{resize : "none"}}
-                />
+              <h6 className="space-10">
+                生成结果
+                <Clipboard component="a" button-href="#" data-clipboard-text={results.map(result => result.text).join("\n")}>[复制揭秘]</Clipboard>
+              </h6>
+              <div className="text-left space-10">
+                {results.map((result, i) => {
+                  return <div key={i}>
+                    {result.text}&nbsp;
+                    {result.copyText !== null && <Clipboard component="a" button-href="#" data-clipboard-text={result.copyText}>[复制QQ消息]</Clipboard>}
+                  </div>;
+                })}
               </div>
             </div>
           </div>
@@ -168,7 +212,7 @@ class App extends Component {
             </div>
           </div>
           <div className="row space-10">
-            <div className="col-6 text-center">
+            <div className="col-4 text-center">
               <input type="radio"
                      className="spacing-inline-5"
                      value={BLOODBOUND}
@@ -178,7 +222,7 @@ class App extends Component {
               />
               鲜血盟约
             </div>
-            <div className="col-6 text-center">
+            <div className="col-4 text-center">
               <input type="radio"
                      className="spacing-inline-5"
                      value={ONENIGHT}
@@ -187,6 +231,16 @@ class App extends Component {
                      onChange={value => this.setState({gameType: value.currentTarget.value})}
               />
               一夜狼人
+            </div>
+            <div className="col-4 text-center">
+              <input type="radio"
+                     className="spacing-inline-5"
+                     value={ONEDAYFAN}
+                     name="game_type_radio"
+                     checked={gameType === ONEDAYFAN}
+                     onChange={value => this.setState({gameType: value.currentTarget.value})}
+              />
+              一日扇子狼人
             </div>
           </div>
           <div className="row space-10">
