@@ -53,12 +53,8 @@ class App extends Component {
 
   handleWordColor(i, j) {
     let { words } = this.state;
-    if (words[i][j].now === 0) {
-      words[i][j].now = words[i][j].color;
-      if (words[i][j].now === 0) words[i][j].now = 4;
-    } else {
-      words[i][j].now = 0;
-    }
+    words[i][j].now++;
+    words[i][j].now%=5;
     this.setState({words: words});
   }
 
