@@ -35,7 +35,7 @@ body {
 
 .index-area {
   min-width: 400px;
-  max-width: 500px;
+  max-width: 700px;
   white-space: pre-line;
   padding-bottom: 200px;
 }
@@ -54,4 +54,13 @@ body {
   display: inline-block;
   margin-left: 5px;
   margin-right: 5px;
+}
+
+.word-board {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.word-board td {
+  border: grey solid 1px;
 }

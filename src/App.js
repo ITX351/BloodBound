@@ -5,6 +5,7 @@ import './App.css';
 const BLOODBOUND = "BloodBound";
 const ONENIGHT = "OneNight";
 const ONEDAYFAN = "OneDayFan";
+const GUESSWORD = "GuessWord";
 
 class App extends Component {
   constructor(props) {
@@ -14,7 +15,8 @@ class App extends Component {
       playerNames: "",
       shufflePlayerList: false,
       results: [],
-      gameType: BLOODBOUND // "BloodBound" or "OneNight" or "OneDayFan"
+      words: [],
+      gameType: BLOODBOUND // "BloodBound" or "OneNight" or "OneDayFan" or "GuessWord"
     };
   }
 
@@ -29,6 +31,31 @@ class App extends Component {
 
   static randInt(upperBound) {
     return Math.ceil(Math.random() * upperBound);
+  }
+
+  static getRGB(color) {
+    if (color === 0) {
+      return "rgba(255, 255, 255, 1)";
+    }
+    if (color === 1) {
+      return "rgba(255, 0, 0, 0.5)";
+    }
+    if (color === 2) {
+      return "rgba(0, 0, 255, 0.5)";
+    }
+    if (color === 3) {
+      return "rgba(0, 0, 0, 0.25)";
+    }
+    if (color === 4) {
+      return "rgba(255, 255, 0, 0.5)";
+    }
+  }
+
+  handleWordColor(i, j) {
+    let { words } = this.state;
+    words[i][j].now++;
+    words[i][j].now%=5;
+    this.setState({words: words});
   }
 
   handleSubmit(e) {
@@ -149,12 +176,28 @@ class App extends Component {
         })
       }
       newPlayerNames += "随机" + App.randInt(playerNameList.length).toString() + "发言\n";
+    } else if (gameType === GUESSWORD) {
+      // 0 - 白, 1 - 红, 2 - 蓝, 3 - 黑
+      let colors = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3];
+      App.shuffleArray(colors);
+      let wordList = playerNames.trim().split(/[ \t\r\n]+/);
+      let words = [];
+      for (let i = 0; i < Math.min(wordList.length, 25); i++) {
+        if (i % 5 === 0) words.push([]);
+        words[words.length - 1].push({
+          text: wordList[i],
+          color: colors[i],
+          now: 0,
+        });
+      }
+      this.setState({words: words});
+      return;
     }
     this.setState({playerNames: newPlayerNames, results: secrets});
   }
 
   render() {
-    const {playerNames, shufflePlayerList, results, gameType} = this.state;
+    const {playerNames, shufflePlayerList, results, words, gameType} = this.state;
     console.log(results);
 
     return (
@@ -165,22 +208,23 @@ class App extends Component {
             支持规则：
             <a href="/forum.php?mod=viewthread&tid=5859">鲜血盟约</a>&nbsp;
             <a href="/forum.php?mod=viewthread&tid=6614">一夜狼人</a>&nbsp;
-            <a href="/forum.php?mod=viewthread&tid=7830">扇子狼人</a>
+            <a href="/forum.php?mod=viewthread&tid=7830">扇子狼人</a>&nbsp;
+            <a href="#">猜词</a>
             <br/>项目源代码：
-            <a href="https://github.com/ITX351/BloodBound">GitHub</a>
+            <a href="https://github.com/ITX351/BloodBound">{`GitHub © ITX351 & lydrainbowcat`}</a>
           </h6>
         </header>
         <div className="container-fluid index-area">
           <div className="row space-10 no-gutters">
             <div className="col-4 text-center">
               <h6 className="space-10">
-                演员列表
+                {gameType !== GUESSWORD ? "演员列表" : "词板"}
                 <Clipboard component="a" button-href="#" data-clipboard-text={playerNames}>[复制]</Clipboard>
               </h6>
               <div>
                 <textarea
                   value={playerNames}
-                  rows="12"
+                  rows="13"
                   style={{width : "85%"}}
                   onChange={event => this.setState({playerNames: event.target.value})}
                 />
@@ -189,15 +233,34 @@ class App extends Component {
             <div className="col-8 text-center">
               <h6 className="space-10">
                 生成结果
-                <Clipboard component="a" button-href="#" data-clipboard-text={results.map(result => result.text).join("\n")}>[复制揭秘]</Clipboard>
+                {gameType !== GUESSWORD &&
+                <Clipboard component="a" button-href="#" data-clipboard-text={results.map(result => result.text).join("\n")}>[复制揭秘]</Clipboard>}
               </h6>
               <div className="text-left space-10">
-                {results.map((result, i) => {
+                {gameType !== GUESSWORD && results.map((result, i) => {
                   return <div key={i}>
                     {result.text}&nbsp;
                     {result.copyText !== null && <Clipboard component="a" button-href="#" data-clipboard-text={result.copyText}>[复制QQ消息]</Clipboard>}
                   </div>;
                 })}
+                {gameType === GUESSWORD && <div>
+                  <table className="word-board">
+                    {words.map((row, i) => <tr key={i}>
+                      {row.map((word, j) => <td key={i*5+j} style={{backgroundColor: App.getRGB(word.color)}}>
+                        {word.text}
+                      </td>)}
+                    </tr>)}
+                  </table>
+                  {words.length > 0 && <div className="space-20"></div>}
+                  {words.length > 0 && <h6 className="text-center">动态词板（点击改变颜色）</h6>}
+                  <table className="word-board">
+                    {words.map((row, i) => <tr key={i}>
+                      {row.map((word, j) => <td key={i*5+j} style={{backgroundColor: App.getRGB(word.now)}} onClick={this.handleWordColor.bind(this, i, j)}>
+                        {word.text}
+                      </td>)}
+                    </tr>)}
+                  </table>
+                </div>}
               </div>
             </div>
           </div>
@@ -213,7 +276,7 @@ class App extends Component {
             </div>
           </div>
           <div className="row space-10">
-            <div className="col-4 text-center">
+            <div className="col-3 text-center">
               <input type="radio"
                      className="spacing-inline-5"
                      value={BLOODBOUND}
@@ -223,7 +286,7 @@ class App extends Component {
               />
               鲜血盟约(砍树)
             </div>
-            <div className="col-4 text-center">
+            <div className="col-3 text-center">
               <input type="radio"
                      className="spacing-inline-5"
                      value={ONENIGHT}
@@ -233,7 +296,7 @@ class App extends Component {
               />
               一夜狼人
             </div>
-            <div className="col-4 text-center">
+            <div className="col-3 text-center">
               <input type="radio"
                      className="spacing-inline-5"
                      value={ONEDAYFAN}
@@ -242,6 +305,16 @@ class App extends Component {
                      onChange={value => this.setState({gameType: value.currentTarget.value})}
               />
               扇子狼人
+            </div>
+            <div className="col-3 text-center">
+              <input type="radio"
+                     className="spacing-inline-5"
+                     value={GUESSWORD}
+                     name="game_type_radio"
+                     checked={gameType === GUESSWORD}
+                     onChange={value => this.setState({gameType: value.currentTarget.value})}
+              />
+              猜词
             </div>
           </div>
           <div className="row space-10">
