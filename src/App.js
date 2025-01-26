@@ -6,17 +6,24 @@ const BLOODBOUND = "BloodBound";
 const ONENIGHT = "OneNight";
 const ONEDAYFAN = "OneDayFan";
 const GUESSWORD = "GuessWord";
+const CUSTOM = "Custom"; // 新增自定义游戏模式
+
+const bloodBoundIdentityNameList = ["", "长老", "刺客", "小丑", "炼金术师", "感应者", "守护者", "狂战士", "法师", "交际花"];
+const oneNightIdentityNameList = ["狼人", "狼人", "占卜", "捣蛋", "酒鬼", "怪盗", "村民", "失眠", "幽灵", "皮匠", "猎人", "爪牙"];
+const oneDayFanIdentityNameList = ["狼人", "狼人", "狼人", "狼王", "村民", "村民", "村民", "警长", "预言家", "女巫", "猎人", "白痴"];
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleGameTypeChange = this.handleGameTypeChange.bind(this); // 新增游戏类型切换处理函数
     this.state = {
       playerNames: "",
       shufflePlayerList: false,
       results: [],
       words: [],
-      gameType: BLOODBOUND // "BloodBound" or "OneNight" or "OneDayFan" or "GuessWord"
+      identities: bloodBoundIdentityNameList.join("\n"), // 使用一个状态存储身份列表
+      gameType: BLOODBOUND // "BloodBound" or "OneNight" or "OneDayFan" or "GuessWord" or "Custom"
     };
   }
 
@@ -58,16 +65,28 @@ class App extends Component {
     this.setState({words: words});
   }
 
+  handleGameTypeChange(e) {
+    const gameType = e.currentTarget.value;
+    //let identities = this.identities;
+    let identities = "";
+    if (gameType === BLOODBOUND) {
+      identities = bloodBoundIdentityNameList.join("\n");
+    } else if (gameType === ONENIGHT) {
+      identities = oneNightIdentityNameList.join("\n");
+    } else if (gameType === ONEDAYFAN) {
+      identities = oneDayFanIdentityNameList.join("\n");
+    } else if (gameType === CUSTOM) {
+      identities = this.state.identities;
+    }
+    this.setState({ gameType, identities });
+  }
+
   handleSubmit(e) {
     e.preventDefault();
 
-    const {playerNames, shufflePlayerList, gameType} = this.state;
+    const {playerNames, shufflePlayerList, gameType, identities} = this.state;
 
-    let bloodBoundIdentityNameList = ["", "长老", "刺客", "小丑", "炼金术师", "感应者", "守护者", "狂战士", "法师", "交际花"];
-    let oneNightIdentityNameList = ["狼人", "狼人", "占卜", "捣蛋", "酒鬼", "怪盗", "村民", "失眠",
-                                    "幽灵", "皮匠", "猎人", "爪牙"];
-    let oneDayFanIdentityNameList = ["狼人", "狼人", "狼人", "狼王", "村民", "村民", "村民", "警长",
-                                     "预言家", "女巫", "猎人", "白痴"];
+    let identityNameList = identities.trim().split("\n"); // 获取身份列表
 
     let playerNameList = playerNames.trim().split("\n");
 
@@ -79,7 +98,8 @@ class App extends Component {
       playerNameList[i] = playerName;
     }
     while (playerNameList[playerNameList.length - 1].startsWith("随机") ||
-      playerNameList[playerNameList.length - 1].startsWith("人配置")
+      playerNameList[playerNameList.length - 1].startsWith("人配置") ||
+      playerNameList[playerNameList.length - 1].startsWith("剩余")
       ) {
       playerNameList = playerNameList.slice(0, playerNameList.length - 1);
     }
@@ -113,7 +133,7 @@ class App extends Component {
         let thisStr = finalList[i];
         let identityName = "";
         if (thisStr !== "审判者") {
-          identityName = bloodBoundIdentityNameList[parseInt(thisStr.slice(1, 2), 10)] + " ";
+          identityName = identityNameList[parseInt(thisStr.slice(1, 2), 10)] + " ";
         }
 
         let nextStr = finalList[(i + 1) % finalList.length];
@@ -136,7 +156,7 @@ class App extends Component {
       newPlayerNames += "随机" + App.randInt(playerNameList.length).toString() + "提刀";
     } else if (gameType === ONENIGHT) {
       let identityNum = playerNameList.length + 3;
-      let oneNightIdentities = oneNightIdentityNameList.slice(0, identityNum);
+      let oneNightIdentities = identityNameList.slice(0, identityNum);
       App.shuffleArray(oneNightIdentities);
 
       for (let i = 0; i < identityNum; i++) {
@@ -155,10 +175,10 @@ class App extends Component {
 
       newPlayerNames += playerNameList.length.toString() + "人配置：";
       for (let i = 0; i < identityNum; i++) {
-        newPlayerNames += oneNightIdentityNameList[i] + " ";
+        newPlayerNames += identityNameList[i] + " ";
       }
     } else if (gameType === ONEDAYFAN) {
-      let oneDayFanIdentities = oneDayFanIdentityNameList.slice();
+      let oneDayFanIdentities = identityNameList.slice();
       App.shuffleArray(oneDayFanIdentities);
       oneDayFanIdentities = oneDayFanIdentities.slice(0, playerNameList.length);
 
@@ -192,12 +212,43 @@ class App extends Component {
       }
       this.setState({words: words});
       return;
+    } else if (gameType === CUSTOM) {
+      let identityNum = playerNameList.length;
+      let customIdentities = identityNameList.slice();
+      App.shuffleArray(customIdentities);
+      let assignedIdentities = customIdentities.slice(0, identityNum);
+      let remainingIdentities = customIdentities.slice(identityNum);
+
+      for (let i = 0; i < identityNum; i++) {
+        let secretText = "";
+        if (i < playerNameList.length) {
+          newPlayerNames += (i + 1).toString() + playerNameList[i] + "\n";
+          secretText += playerNameList[i] + " ";
+        }
+        secretText += (i + 1).toString() + assignedIdentities[i];
+        secrets.push({
+          text: secretText,
+          copyText: i < playerNameList.length ? secretText : null
+        });
+      }
+      newPlayerNames += "随机" + App.randInt(playerNameList.length).toString() + "发言\n";
+
+      newPlayerNames += playerNameList.length.toString() + "人配置：";
+      for (let i = 0; i < identityNum; i++) {
+        newPlayerNames += assignedIdentities[i] + " ";
+      }
+      if (remainingIdentities.length > 0) {
+        newPlayerNames += "\n剩余身份：";
+        for (let i = 0; i < remainingIdentities.length; i++) {
+          newPlayerNames += remainingIdentities[i] + " ";
+        }
+      }
     }
     this.setState({playerNames: newPlayerNames, results: secrets});
   }
 
   render() {
-    const {playerNames, shufflePlayerList, results, words, gameType} = this.state;
+    const {playerNames, shufflePlayerList, results, words, gameType, identities} = this.state;
     console.log(results);
 
     return (
@@ -209,13 +260,23 @@ class App extends Component {
             <a href="/forum.php?mod=viewthread&tid=5859">鲜血盟约</a>&nbsp;
             <a href="/forum.php?mod=viewthread&tid=6614">一夜狼人</a>&nbsp;
             <a href="/forum.php?mod=viewthread&tid=7830">扇子狼人</a>&nbsp;
-            <a href="#">猜词</a>
+            <a href="#">猜词</a>&nbsp;
+            <a href="#">自定义</a>
             <br/>项目源代码：
             <a href="https://github.com/ITX351/BloodBound">{`GitHub © ITX351 & lydrainbowcat`}</a>
           </h6>
         </header>
         <div className="container-fluid index-area">
           <div className="row space-10 no-gutters">
+            <div className="col-2 text-center">
+              <h6 className="space-10">身份列表</h6>
+              <textarea
+                value={identities}
+                rows="13"
+                style={{width : "85%"}}
+                onChange={event => this.setState({identities: event.target.value})}
+              />
+            </div>
             <div className="col-4 text-center">
               <h6 className="space-10">
                 {gameType !== GUESSWORD ? "演员列表" : "词板"}
@@ -230,7 +291,7 @@ class App extends Component {
                 />
               </div>
             </div>
-            <div className="col-8 text-center">
+            <div className="col-6 text-center">
               <h6 className="space-10">
                 生成结果
                 {gameType !== GUESSWORD &&
@@ -276,45 +337,55 @@ class App extends Component {
             </div>
           </div>
           <div className="row space-10">
-            <div className="col-3 text-center">
+            <div className="col-2 text-center">
               <input type="radio"
                      className="spacing-inline-5"
                      value={BLOODBOUND}
                      name="game_type_radio"
                      checked={gameType === BLOODBOUND}
-                     onChange={value => this.setState({gameType: value.currentTarget.value})}
+                     onChange={this.handleGameTypeChange}
               />
               鲜血盟约(砍树)
             </div>
-            <div className="col-3 text-center">
+            <div className="col-2 text-center">
               <input type="radio"
                      className="spacing-inline-5"
                      value={ONENIGHT}
                      name="game_type_radio"
                      checked={gameType === ONENIGHT}
-                     onChange={value => this.setState({gameType: value.currentTarget.value})}
+                     onChange={this.handleGameTypeChange}
               />
               一夜狼人
             </div>
-            <div className="col-3 text-center">
+            <div className="col-2 text-center">
               <input type="radio"
                      className="spacing-inline-5"
                      value={ONEDAYFAN}
                      name="game_type_radio"
                      checked={gameType === ONEDAYFAN}
-                     onChange={value => this.setState({gameType: value.currentTarget.value})}
+                     onChange={this.handleGameTypeChange}
               />
               扇子狼人
             </div>
-            <div className="col-3 text-center">
+            <div className="col-2 text-center">
               <input type="radio"
                      className="spacing-inline-5"
                      value={GUESSWORD}
                      name="game_type_radio"
                      checked={gameType === GUESSWORD}
-                     onChange={value => this.setState({gameType: value.currentTarget.value})}
+                     onChange={this.handleGameTypeChange}
               />
               猜词
+            </div>
+            <div className="col-2 text-center">
+              <input type="radio"
+                     className="spacing-inline-5"
+                     value={CUSTOM}
+                     name="game_type_radio"
+                     checked={gameType === CUSTOM}
+                     onChange={this.handleGameTypeChange}
+              />
+              自定义
             </div>
           </div>
           <div className="row space-10">
