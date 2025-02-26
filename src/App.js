@@ -8,7 +8,7 @@ const ONEDAYFAN = "OneDayFan";
 const GUESSWORD = "GuessWord";
 const CUSTOM = "Custom"; // 新增自定义游戏模式
 
-const bloodBoundIdentityNameList = ["", "长老", "刺客", "小丑", "炼金术师", "感应者", "守护者", "狂战士", "法师", "交际花"];
+const bloodBoundIdentityNameList = ["长老", "刺客", "小丑", "炼金术师", "感应者", "守护者", "狂战士", "法师", "交际花"];
 const oneNightIdentityNameList = ["狼人", "狼人", "占卜", "捣蛋", "酒鬼", "怪盗", "村民", "失眠", "幽灵", "皮匠", "猎人", "爪牙"];
 const oneDayFanIdentityNameList = ["狼人", "狼人", "狼人", "狼王", "村民", "村民", "村民", "警长", "预言家", "女巫", "猎人", "白痴"];
 
@@ -41,21 +41,14 @@ class App extends Component {
   }
 
   static getRGB(color) {
-    if (color === 0) {
-      return "rgba(255, 255, 255, 1)";
-    }
-    if (color === 1) {
-      return "rgba(255, 0, 0, 0.5)";
-    }
-    if (color === 2) {
-      return "rgba(0, 0, 255, 0.5)";
-    }
-    if (color === 3) {
-      return "rgba(0, 0, 0, 0.25)";
-    }
-    if (color === 4) {
-      return "rgba(255, 255, 0, 0.5)";
-    }
+    const colors = [
+      "rgba(255, 255, 255, 1)",    // 0
+      "rgba(255, 0, 0, 0.5)",      // 1
+      "rgba(0, 0, 255, 0.5)",      // 2
+      "rgba(0, 0, 0, 0.25)",       // 3
+      "rgba(255, 255, 0, 0.5)"     // 4
+    ];
+    return colors[color];
   }
 
   handleWordColor(i, j) {
@@ -133,7 +126,7 @@ class App extends Component {
         let thisStr = finalList[i];
         let identityName = "";
         if (thisStr !== "审判者") {
-          identityName = identityNameList[parseInt(thisStr.slice(1, 2), 10)] + " ";
+          identityName = identityNameList[parseInt(thisStr.slice(1, 2), 10) - 1] + " ";
         }
 
         let nextStr = finalList[(i + 1) % finalList.length];
